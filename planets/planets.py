@@ -17,11 +17,11 @@ def get_screen_middle():
     size = get_screen_size()
     return (size[0] / 2.0, size[1] / 2.0)
 
-def get_image(image_name):
+def get_image(image_name, size):
     """Returns the image path for a given image name."""
     root = os.path.dirname(os.path.realpath(__file__))
     image = pygame.image.load(os.path.join(root, 'images', image_name + '.png'))
-    self.image = pygame.transform.scale(image, [radius * 2, radius * 2])
+    image = pygame.transform.scale(image, [size, size])
     return image
      
 
@@ -34,7 +34,7 @@ class Sun:
         self.radius = radius
         self.color = color
         self.position = position
-        self.image = get_image(image_name) 
+        self.image = get_image(image_name, radius * 2) 
 
     def update(self, t):
         """Does nothing; simply for compatability with Planets."""
@@ -48,7 +48,7 @@ class Planet:
     def __init__(self, radius, image_name, semi_major_axis, period, eccentricity, sun):
         """Generates a new Planet."""
         self.radius = radius
-        self.image = get_image(image_name) 
+        self.image = get_image(image_name, radius * 2) 
         self.semi_major_axis = semi_major_axis
         self.period = period
         self.eccentricity = eccentricity

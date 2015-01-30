@@ -1,4 +1,4 @@
-from planets import *
+from planets.planets import *
 
 # Sun has been shrunk 100 times
 # Planet distances shrunk by 1000 times
