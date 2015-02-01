@@ -17,11 +17,10 @@ def get_screen_middle():
     size = get_screen_size()
     return (size[0] / 2.0, size[1] / 2.0)
 
-def get_image(image_name, size):
+def get_image(image_name):
     """Returns the image path for a given image name."""
     root = os.path.dirname(os.path.realpath(__file__))
     image = pygame.image.load(os.path.join(root, 'images', image_name + '.png'))
-    image = pygame.transform.scale(image, [size, size])
     return image
      
 
@@ -34,9 +33,9 @@ class Sun:
         self.radius = radius
         self.color = color
         self.position = position
-        self.image = get_image(image_name, radius * 2) 
+        self.image = get_image(image_name)
 
-    def update(self, t):
+    def update(self, t, zoom):
         """Does nothing; simply for compatability with Planets."""
         pass
 
@@ -48,7 +47,7 @@ class Planet:
     def __init__(self, radius, image_name, semi_major_axis, period, eccentricity, sun):
         """Generates a new Planet."""
         self.radius = radius
-        self.image = get_image(image_name, radius * 2) 
+        self.image = get_image(image_name)
         self.semi_major_axis = semi_major_axis
         self.period = period
         self.eccentricity = eccentricity
@@ -57,7 +56,7 @@ class Planet:
         if self.sun.position is not None:
             self.center = self.sun.position
 
-    def update(self, t):
+    def update(self, t, zoom):
         """Updates the position of the Planet."""
         # Compute the mean motion
         n = 2.0 * math.pi / self.period
@@ -75,7 +74,7 @@ class Planet:
         y = r * math.sin(theta)
         if self.center is None:
             self.center = get_screen_middle()
-        self.position = (int(x) + self.center[0], int(y) + self.center[1])
+        self.position = (zoom * int(x) + self.center[0], zoom * int(y) + self.center[1])
 
 
 class System:
@@ -94,16 +93,19 @@ class System:
         self.screen_size = get_screen_size()
         screen = pygame.display.set_mode(self.screen_size, pygame.FULLSCREEN)
         quit = False
+        zoom = 1.0
         while not quit:
             screen.fill(self.color)
 
             for body in self.bodies:
-                body.update(self.time)
+                body.update(self.time, zoom)
                 if body.position is None:
                     body.position = get_screen_middle()
-                x = body.position[0] - body.radius
-                y = body.position[1] - body.radius
-                screen.blit(body.image, (x, y))
+                x = body.position[0] - body.radius * zoom
+                y = body.position[1] - body.radius * zoom
+                size = int(2.0 * body.radius * zoom)
+                image = pygame.transform.smoothscale(body.image, [size, size])
+                screen.blit(image, (x, y))
 
             self.time += 1
             pygame.display.flip()
@@ -112,3 +114,9 @@ class System:
                 if event.type == pygame.QUIT or pygame.key.get_pressed()[pygame.K_ESCAPE]:
                     pygame.quit()
                     quit = True
+                elif pygame.key.get_pressed()[pygame.K_UP]:
+                    zoom *= 1.2 
+                elif pygame.key.get_pressed()[pygame.K_DOWN]:
+                    zoom *= (1.0/1.2) 
+                if zoom > 1.0:
+                    zoom = 1.0
